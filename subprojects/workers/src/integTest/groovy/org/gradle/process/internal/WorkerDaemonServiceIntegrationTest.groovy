@@ -29,6 +29,7 @@ import org.junit.Assume
 import org.junit.Rule
 
 class WorkerDaemonServiceIntegrationTest extends AbstractWorkerDaemonServiceIntegrationTest {
+    private final String fooPath = TextUtil.normaliseFileSeparators(file('foo').absolutePath)
 
     @Rule public final BlockingHttpServer blockingServer = new BlockingHttpServer()
 
@@ -230,7 +231,7 @@ class WorkerDaemonServiceIntegrationTest extends AbstractWorkerDaemonServiceInte
                         systemProperty("foo", "bar")
                         jvmArgs("-Dbar=baz")
                         bootstrapClasspath = fileTree(new File(Jvm.current().jre.homeDir, "lib")).include("*.jar")
-                        bootstrapClasspath(new File("/foo"))
+                        bootstrapClasspath(new File('${fooPath}'))
                         defaultCharacterEncoding = "UTF-8"
                         enableAssertions = true
                         workingDir = file('${outputFileDirPath}')
@@ -315,6 +316,7 @@ class WorkerDaemonServiceIntegrationTest extends AbstractWorkerDaemonServiceInte
     String getOptionVerifyingRunnable() {
         return """
             import java.io.File;
+            import java.util.regex.Pattern;
             import java.util.List;
             import org.gradle.other.Foo;
             import java.lang.management.ManagementFactory;
@@ -324,7 +326,7 @@ class WorkerDaemonServiceIntegrationTest extends AbstractWorkerDaemonServiceInte
                 public OptionVerifyingRunnable(List<String> files, File outputDir, Foo foo) {
                     super(files, outputDir, foo);
                 }
-                
+
                 public void run() {
                     RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
                     List<String> arguments = runtimeMxBean.getInputArguments();
@@ -334,14 +336,14 @@ class WorkerDaemonServiceIntegrationTest extends AbstractWorkerDaemonServiceInte
                     assert arguments.contains("-Xms128m");
                     assert arguments.contains("-Dfile.encoding=UTF-8");
                     assert arguments.contains("-ea");
-                    
-                    assert runtimeMxBean.getBootClassPath().endsWith("${File.separator}foo");
-                    
+
+                    assert runtimeMxBean.getBootClassPath().replaceAll(Pattern.quote(File.separator),'/').endsWith("${fooPath}");
+
                     assert new File(System.getProperty("user.dir")).equals(new File('${outputFileDirPath}'));
 
                     //NotYetImplemented
                     //assert System.getenv("foo").equals("bar")
-                    
+
                     super.run();
                 }
             }
@@ -359,10 +361,10 @@ class WorkerDaemonServiceIntegrationTest extends AbstractWorkerDaemonServiceInte
                 public ExecutableVerifyingRunnable(List<String> files, File outputDir, Foo foo) {
                     super(files, outputDir, foo);
                 }
-                
+
                 public void run() {
                     assert new File(System.getProperty("java.home")).equals(new File('${differentJvmHome.absolutePath}'));
-                    
+
                     super.run();
                 }
             }

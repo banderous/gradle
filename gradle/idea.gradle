@@ -93,7 +93,7 @@ idea {
                 gradleSettings.appendNode('option', [name: 'SDK_HOME', value: gradle.gradleHomeDir.absolutePath])
 
                 // set compiler heap space
-                compilerConfig.appendNode('option', [name: 'BUILD_PROCESS_HEAP_SIZE', value: '2048'])
+                compilerConfig.appendNode('option', [name: 'BUILD_PROCESS_HEAP_SIZE', value: '1024'])
 
                 // Nullability annotations
                 def nullableManager = node.component.find { it.'@name' == 'NullableNotNullManager' }
@@ -177,7 +177,7 @@ idea {
                       <excludes>
                         <file url="file://$PROJECT_DIR$/subprojects/plugins/src/test/groovy/org/gradle/api/internal/tasks/testing/junit/JUnitTestClassProcessorTest.groovy" />
                       </excludes>
-                      <option name="heapSize" value="2000" />
+                      <option name="heapSize" value="1024" />
                     </component>
                 '''))
 
@@ -208,7 +208,7 @@ idea {
 
         node.append(new XmlParser().parseText('''
             <component name="CompilerWorkspaceConfiguration">
-              <option name="COMPILER_PROCESS_HEAP_SIZE" value="2048" />
+              <option name="COMPILER_PROCESS_HEAP_SIZE" value="1024" />
             </component>
         '''))
 
